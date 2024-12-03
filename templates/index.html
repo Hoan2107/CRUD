@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý sản phẩm</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Quản lý sản phẩm</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <h2>Thêm sản phẩm</h2>
+        <a href="{{ url_for('add_product') }}" class="btn">Thêm sản phẩm mới</a>
+
+        <h2>Import danh sách sản phẩm</h2>
+        <form action="{{ url_for('import_csv') }}" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv" required>
+            <button type="submit" class="btn">Import CSV</button>
+        </form>
+        <a href="{{ url_for('export_products') }}" class="btn">Export CSV</a>
+
+        <h2>Tìm kiếm sản phẩm</h2>
+        <form action="{{ url_for('search_product') }}" method="get">
+            <input type="text" name="query" placeholder="Tìm sản phẩm..." value="{{ request.args.get('query', '') }}">
+            <button type="submit" class="btn">Tìm kiếm</button>
+        </form>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="search-info">
+            {% if query and total_products %}
+                <p>Kết quả tìm kiếm cho: <strong>{{ query }}</strong>, tổng số bản ghi: <strong>{{ total_products }}</strong></p>
+            {% endif %}
+        </div>
+
+        <h2>Tính toán sản phẩm</h2>
+        <a href="{{ url_for('calculate_product') }}" class="btn">Tính toán sản phẩm</a>
+    </div>
+
+    <div class="table-container">
+        <h2>Danh sách sản phẩm</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Số lượng</th>
+                    <th>Giá</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                    <tr>
+                        <td>{{ product['product_id'] }}</td>
+                        <td>{{ product['name'] }}</td>
+                        <td>{{ product['quantity'] }}</td>
+                        <td>{{ product['price'] }}</td>
+                        <td class="table-actions">
+                            <a href="{{ url_for('edit_product', product_id=product['product_id']) }}" class="edit">Sửa</a>
+                            <a href="{{ url_for('delete_product', product_id=product['product_id']) }}" class="delete">Xóa</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="sort-options">
+            <a href="{{ url_for('product_list', sort_by='product_id', page=page) }}" 
+               class="btn {% if sort_by == 'product_id' %}active{% endif %}">
+               Sắp xếp theo ID
+            </a>
+            <a href="{{ url_for('product_list', sort_by='name', page=page) }}" 
+               class="btn {% if sort_by == 'name' %}active{% endif %}">
+               Sắp xếp theo tên
+            </a>
+        </div>
+        
+    
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="{{ url_for('product_list', page=page-1, query=request.args.get('query', '')) }}">Trước</a>
+            {% endif %}
+            
+            {% for p in range(1, total_pages + 1) %}
+                <a href="{{ url_for('product_list', page=p, query=request.args.get('query', '')) }}" {% if p == page %}class="active"{% endif %}>{{ p }}</a>
+            {% endfor %}
+            
+            {% if page < total_pages %}
+                <a href="{{ url_for('product_list', page=page+1, query=request.args.get('query', '')) }}">Tiếp theo</a>
+            {% endif %}
+        </div>
+    </div>
+
+</body>
+</html>

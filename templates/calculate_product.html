@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính toán sản phẩm</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Tính toán sản phẩm</h1>
+
+        <div class="form-group">
+            <h2>Lựa chọn loại sản phẩm để tính toán</h2>
+            <form action="{{ url_for('calculate_product') }}" method="get" class="product-form">
+                <label for="product_name">Chọn tên sản phẩm:</label>
+                <select name="product_name" id="product_name" required>
+                    <option value="">--Chọn sản phẩm--</option>
+                    {% for name in unique_product_names %}
+                        <option value="{{ name }}" {% if name == product_name %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn-submit">Tính toán</button>
+            </form>
+        </div>
+
+        {% if product_name %}
+            <div class="result-section">
+                <h2>Kết quả tính toán cho sản phẩm: <span class="highlight">{{ product_name }}</span></h2>
+                <p><strong>Tổng số lượng:</strong> {{ total_quantity }}</p>
+                <p><strong>Tổng giá trị:</strong> {{ total_value | round(2) }}</p>
+            </div>
+
+            <h2>Sản phẩm đã chọn:</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Số lượng</th>
+                        <th>Giá</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in filtered_products %}
+                        <tr>
+                            <td>{{ product['product_id'] }}</td>
+                            <td>{{ product['name'] }}</td>
+                            <td>{{ product['quantity'] }}</td>
+                            <td>{{ product['price'] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        <div class="form-actions">
+            <a href="{{ url_for('index') }}" class="btn-back">Quay lại trang chủ</a>
+        </div>
+    </div>
+</body>
+</html>
